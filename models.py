@@ -12,6 +12,8 @@ class Business(Base):
     category = Column(String(100))
     phone = Column(String(50))
     phone_type = Column(String(20), default="unknown")  # mobile, landline, unknown
+    country_code = Column(String(2), nullable=True)
+    phone_normalized = Column(String(30), nullable=True)
     website = Column(String(500))
     address = Column(Text)
     rating = Column(Float)
@@ -30,7 +32,17 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     business_id = Column(Integer, ForeignKey("businesses.id"), nullable=False)
+
     generated_message = Column(Text, nullable=False)
+
+    channel = Column(String(20), default="whatsapp")
+    status = Column(String(20), default="DRAFT")
+    provider = Column(String(30), nullable=True)
+    provider_message_id = Column(String(255), nullable=True)
+
+    sent_at = Column(DateTime(timezone=True), nullable=True)
+    error_message = Column(Text, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     business = relationship("Business", back_populates="messages")

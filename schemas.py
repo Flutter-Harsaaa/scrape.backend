@@ -66,6 +66,12 @@ class MessageOut(BaseModel):
     id: int
     business_id: int
     generated_message: str
+    channel: Optional[str]
+    status: Optional[str]
+    provider: Optional[str]
+    provider_message_id: Optional[str]
+    sent_at: Optional[datetime]
+    error_message: Optional[str]
     created_at: datetime
 
 

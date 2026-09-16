@@ -1,7 +1,7 @@
 import httpx
 import os
 from dotenv import load_dotenv
-from services.phone_utils import classify_phone
+from services.phone_utils import classify_phone, normalize_phone
 
 load_dotenv()
 
@@ -22,6 +22,7 @@ async def search_places(query: str, max_results: int = 20) -> list[dict]:
             "places.userRatingCount,"
             "places.websiteUri,"
             "places.nationalPhoneNumber,"
+            "places.internationalPhoneNumber,"
             "places.primaryTypeDisplayName"
         ),
         "Content-Type": "application/json",
@@ -40,11 +41,20 @@ async def search_places(query: str, max_results: int = 20) -> list[dict]:
     results = []
     for place in data.get("places", []):
         website = place.get("websiteUri")
-        phone = place.get("nationalPhoneNumber")
+        national_phone = place.get("nationalPhoneNumber")
+        international_phone = place.get("internationalPhoneNumber")
+
+        phone = international_phone or national_phone
+        phone_normalized = normalize_phone(phone)
         results.append({
             "name": place.get("displayName", {}).get("text", "Unknown"),
-            "category": place.get("primaryTypeDisplayName", {}).get("text") if place.get("primaryTypeDisplayName") else None,
-            "phone": phone,
+            "category": (
+                place.get("primaryTypeDisplayName", {}).get("text")
+                if place.get("primaryTypeDisplayName")
+                else None
+            ),
+            "phone": national_phone,
+            "phone_normalized": phone_normalized,
             "phone_type": classify_phone(phone),
             "website": website,
             "address": place.get("formattedAddress"),
@@ -52,5 +62,4 @@ async def search_places(query: str, max_results: int = 20) -> list[dict]:
             "review_count": place.get("userRatingCount", 0),
             "website_status": "UNCHECKED" if website else "NO_WEBSITE",
         })
-
     return results
