@@ -6,6 +6,7 @@ from database import engine
 from dotenv import load_dotenv
 import models
 import os
+from routers import businesses, messages, website_checker, scraper, pipeline, webhooks
 
 load_dotenv()
 
@@ -32,11 +33,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(
+    webhooks.router,
+    prefix="/api/webhooks",
+    tags=["webhooks"],
+)
 
 @app.middleware("http")
 async def verify_api_key(request: Request, call_next):
     # Skip preflight and health check
-    if request.method == "OPTIONS" or request.url.path == "/api/health":
+    if (
+        request.method == "OPTIONS"
+        or request.url.path == "/api/health"
+        or request.url.path == "/api/webhooks/evolution"
+    ):
         return await call_next(request)
 
     if API_SECRET_KEY:
