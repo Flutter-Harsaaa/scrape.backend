@@ -6,7 +6,7 @@ from database import engine
 from dotenv import load_dotenv
 import models
 import os
-from routers import businesses, messages, website_checker, scraper, pipeline, webhooks
+from routers import businesses, messages, website_checker, scraper, pipeline, webhooks, whatsaap_connection 
 
 load_dotenv()
 
@@ -64,6 +64,11 @@ app.include_router(messages.router, prefix="/api/messages", tags=["messages"])
 app.include_router(website_checker.router, prefix="/api/check", tags=["website-checker"])
 app.include_router(scraper.router, prefix="/api/scrape", tags=["scraper"])
 app.include_router(pipeline.router, prefix="/api/pipeline", tags=["pipeline"])
+app.include_router(
+    whatsaap_connection.router,
+    prefix="/api",
+    tags=["evolution-test"],
+)
 
 
 @app.get("/api/health")
