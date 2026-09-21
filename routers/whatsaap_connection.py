@@ -1,11 +1,14 @@
 import os
-import requests
+from urllib.parse import quote
+
+import httpx
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 
+
 @router.get("/test/evolution")
-def test_evolution():
+async def test_evolution():
     evolution_url = os.getenv("EVOLUTION_API_URL")
     api_key = os.getenv("EVOLUTION_API_KEY")
     instance = os.getenv("EVOLUTION_INSTANCE")
@@ -16,22 +19,24 @@ def test_evolution():
             detail="Evolution API environment variables are missing"
         )
 
+    encoded_instance = quote(instance, safe="")
+
     try:
-        response = requests.get(
-            f"{evolution_url}/instance/connectionState/{instance}",
-            headers={
-                "apikey": api_key
-            },
-            timeout=15
-        )
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(
+                f"{evolution_url}/instance/connectionState/{encoded_instance}",
+                headers={
+                    "apikey": api_key
+                }
+            )
 
         return {
             "status_code": response.status_code,
             "evolution_response": response.json()
         }
 
-    except Exception as e:
+    except httpx.RequestError as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Evolution API connection failed: {str(e)}"
+            status_code=502,
+            detail=f"Could not connect to Evolution API: {str(e)}"
         )
