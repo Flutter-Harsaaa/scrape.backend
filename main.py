@@ -6,14 +6,14 @@ from database import engine
 from dotenv import load_dotenv
 import models
 import os
-from routers import businesses, messages, website_checker, scraper, pipeline, webhooks, whatsaap_connection 
+from routers import businesses, messages, website_checker, scraper, pipeline, webhooks, whatsapp
 
 load_dotenv()
 
 API_SECRET_KEY = os.getenv("API_SECRET_KEY", "")
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:5173,https://scrape-frontend-iota.vercel.app"
+    "http://localhost:5173,https://scrape-frontend-iota.vercel.app,https://scrape-frontend-rose.vercel.app"
 ).split(",")
 
 
@@ -65,9 +65,9 @@ app.include_router(website_checker.router, prefix="/api/check", tags=["website-c
 app.include_router(scraper.router, prefix="/api/scrape", tags=["scraper"])
 app.include_router(pipeline.router, prefix="/api/pipeline", tags=["pipeline"])
 app.include_router(
-    whatsaap_connection.router,
-    prefix="/api",
-    tags=["evolution-test"],
+    whatsapp.router,
+    prefix="/api/whatsapp",
+    tags=["whatsapp"],
 )
 
 
